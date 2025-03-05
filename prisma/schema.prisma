@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Users {
+  id            String         @id @default(uuid())
+  nra           String?        @unique
+  nim           String         @unique
+  role          Role?          @relation(name: "RoleToUsers", fields: [role_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  role_id       Int?
+  subrole       Sub_Role?      @relation(name: "Sub_RoleToUsers", fields: [subrole_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  subrole_id    Int?
+  nama          String
+  username      String?
+  email         String
+  password      String?
+  no_telp       String
+  jenis_kelamin Gender?
+  agama         Religion?
+  image         String?
+  fakultas      String
+  program_studi String
+  status        Status?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime?      @updatedAt
+  passwordreset PasswordReset? @relation("UsersToPasswordReset")
+  candidates    Candidate[]    @relation("CandidateToUsers")
+}
+
+model Candidate {
+  id          Int       @id @default(autoincrement())
+  user        Users     @relation("CandidateToUsers", fields: [user_id], references: [id])
+  user_id     String
+  lk1         Float?
+  lk2         Float?
+  sc          Float?
+  keaktifan   Float?
+  rerata      Float
+  approval    Approval?
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+}
+
+model Role {
+  id          Int                  @id @default(autoincrement())
+  name        String
+  subroles    Sub_Role[]           @relation(name: "RoleToSub_Role")
+  users       Users[]              @relation(name: "RoleToUsers")
+  permissions PermissionsHasRole[]
+  created_at  DateTime             @default(now())
+  updated_at  DateTime?            @updatedAt
+}
+
+model Sub_Role {
+  id          Int                      @id @default(autoincrement())
+  name        String
+  role        Role                     @relation(name: "RoleToSub_Role", fields: [role_id], references: [id], onDelete: Cascade)
+  role_id     Int
+  users       Users[]                  @relation(name: "Sub_RoleToUsers")
+  permissions PermissionsHasSub_Role[]
+  created_at  DateTime                 @default(now())
+  updated_at  DateTime?                @updatedAt
+}
+
+model Permission {
+  id         Int                      @id @default(autoincrement())
+  name       String
+  action     String
+  roles      PermissionsHasRole[]
+  subroles   PermissionsHasSub_Role[]
+  created_at DateTime                 @default(now())
+  updated_at DateTime?                @updatedAt
+}
+
+model PermissionsHasRole {
+  id            Int        @id @default(autoincrement())
+  role_id       Int
+  permission_id Int
+  roles         Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permissions   Permission @relation(fields: [permission_id], references: [id])
+}
+
+model PermissionsHasSub_Role {
+  id            Int        @id @default(autoincrement())
+  subrole_id    Int
+  permission_id Int
+  subroles      Sub_Role   @relation(fields: [subrole_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permissions   Permission @relation(fields: [permission_id], references: [id])
+}
+
+model PasswordReset {
+  token      String   @id @db.Char(21)
+  user_id    String   @unique
+  validUntil DateTime
+  user       Users    @relation("UsersToPasswordReset", fields: [user_id], references: [id])
+
+  @@map("password_reset")
+}
+
+enum Approval {
+  Accepted
+  Rejected
+  OnProgres
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Religion {
+  Islam
+  Kristen
+  Katolik
+  Hindu
+  Budha
+  Other
+}
+
+enum Status {
+  Active
+  Inactive
+}

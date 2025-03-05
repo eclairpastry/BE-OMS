@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: production
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    env_file:
+      - .env.production
+
+  postgres:
+    image: postgres:alpine3.19
+    container_name: database-production
+    restart: always
+    ports:
+      - '5433:5433'
+    env_file:
+      - .env
+    volumes:
+      - postgres_prod:/var/lib/postgresql/data
+
+volumes:
+  postgres_prod:
+    name: ikdev-production
