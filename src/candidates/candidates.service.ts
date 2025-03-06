@@ -322,9 +322,7 @@ export class CandidatesService {
     return nranow;
   }
   
-  /**
-   * Converts a Roman numeral string to its numeric value.
-   */
+  // Converts a Roman numeral string to its numeric value.
   private fromRoman(roman: string): number {
     const romanNumerals: { [key: string]: number } = {
       I: 1,
@@ -349,9 +347,7 @@ export class CandidatesService {
     return num;
   }
   
-  /**
-   * Converts a number to its Roman numeral representation.
-   */
+  // Converts a number to its Roman numeral representation.
   private toRoman(num: number): string {
     const romanNumerals = [
       { value: 1000, numeral: 'M' },

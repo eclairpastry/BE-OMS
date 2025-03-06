@@ -1,15 +1,16 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Req, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Req, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { RegistrationService } from './registration.service';
 import { PrismaService } from 'nestjs-prisma';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags } from '@nestjs/swagger';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/config/multer.config';
 import { RegistrationDto } from './dto/registration.dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorators';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateRegistrationDto } from './dto/update-registration.dto';
+import { join } from 'path';
 
 @ApiTags('Registration')
 @Controller({
@@ -149,6 +150,13 @@ export class RegistrationController {
             message: 'Server Error, cannot delete data',
         });
     }
-}
+  }
 
+  @Public()
+  @Post('/import-csv-register')
+  @UseInterceptors(FileInterceptor('file'))
+  async importCandidates(@UploadedFile() file: Express.Multer.File) {
+    await this.registrationService.importCandidates(file);
+    return { message: 'Import completed successfully.' };
+  }
 }
